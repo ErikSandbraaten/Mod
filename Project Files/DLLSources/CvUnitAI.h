@@ -257,8 +257,8 @@ protected:
 	bool AI_defend();
 	bool AI_safety();
 	bool AI_hide();
-	bool AI_goody();
-	bool AI_goodyRange(int iRange);
+	bool AI_goody(bool bIgnoreCity = false);
+	bool AI_goodyRange(int iRange, bool bIgnoreCity = false);
 	
 	bool AI_isValidExplore(CvPlot* pPlot) const;
 	int AI_explorePlotValue(CvPlot* pPlot, bool bImportantOnly = false) const;

@@ -4835,7 +4835,7 @@ int CvPlayerAI::AI_unitGoldValue(UnitTypes eUnit, UnitAITypes eUnitAI, CvArea* p
 	FAssertMsg(eUnitAI != NO_UNITAI, "UnitAI is not assigned a valid value");
 	CvUnitInfo& kUnitInfo = GC.getUnitInfo(eUnit);
 
-	if (kUnitInfo.getDomainType() != AI_unitAIDomainType(eUnitAI))
+	if (eUnitAI != UNITAI_SCOUT && kUnitInfo.getDomainType() != AI_unitAIDomainType(eUnitAI))
 	{
 		return 0;
 	}
@@ -4861,8 +4861,10 @@ int CvPlayerAI::AI_unitGoldValue(UnitTypes eUnit, UnitAITypes eUnitAI, CvArea* p
 		case UNITAI_SETTLER:
 		case UNITAI_WORKER:
 		case UNITAI_MISSIONARY:
+			break;
 		case UNITAI_SCOUT:
-			if (kUnitInfo.getDefaultProfession() != NO_PROFESSION)
+			if (kUnitInfo.getDomainType() == DOMAIN_LAND && kUnitInfo.getDefaultProfession() != NO_PROFESSION || 
+				kUnitInfo.getDomainType() == DOMAIN_SEA)
 			{
 				bValid = true;
 			}
@@ -5003,9 +5005,29 @@ int CvPlayerAI::AI_unitGoldValue(UnitTypes eUnit, UnitAITypes eUnitAI, CvArea* p
 	case UNITAI_SETTLER:
 	case UNITAI_WORKER:
 	case UNITAI_MISSIONARY:
-	case UNITAI_SCOUT:
 		break;
+	case UNITAI_SCOUT:
+		if (kUnitInfo.getDomainType() == DOMAIN_SEA)
+		{
+			iTempValue = iOffenseCombatValue / 2;
+			iTempValue += iDefenseCombatValue;
+			// Bombard is not useful for a scout
+			iTempValue -= kUnitInfo.getBombardRate() * 50;
 
+			// Prevent ships with large cargo capacity to act as scouts
+			const int iBaseLineCargoSpace = 1;
+
+			iTempValue -= std::max(0, (kUnitInfo.getCargoSpace() - iBaseLineCargoSpace)) * 50;
+
+			// Don't want a privateer for exploring
+			if (kUnitInfo.isHiddenNationality())
+			{
+				iTempValue /= 4;
+			}
+
+			iValue += iTempValue;
+		}
+		break;
 	case UNITAI_WAGON:
 	case UNITAI_TRANSPORT_COAST:
 		iTempValue = iCargoValue + iDefenseCombatValue / 2;
@@ -10804,7 +10826,7 @@ int CvPlayerAI::AI_unitAIValueMultipler(UnitAITypes eUnitAI)
 		case UNITAI_SCOUT:
 			if (!AI_isStrategy(STRATEGY_REVOLUTION_PREPARING))
 			{
-				if (iCount <= 1)
+				//if (iCount <= 1)
 				{
 					int iTotalUnexploredPlots = 0;
 
@@ -10812,7 +10834,8 @@ int CvPlayerAI::AI_unitAIValueMultipler(UnitAITypes eUnitAI)
 					int iLoop;
 					for(pLoopArea = GC.getMapINLINE().firstArea(&iLoop); pLoopArea != NULL; pLoopArea = GC.getMapINLINE().nextArea(&iLoop))
 					{
-						if (!(pLoopArea->isWater()))
+						// TODO: count water and land separately
+						//if (!(pLoopArea->isWater()))
 						{
 							iTotalUnexploredPlots += pLoopArea->getNumRevealedTiles(getTeam());
 						}
@@ -10832,6 +10855,9 @@ int CvPlayerAI::AI_unitAIValueMultipler(UnitAITypes eUnitAI)
 							}
 						}
 					}
+
+					iValue = iValue / (iCount + 1);
+					iValue = 100000;
 				}
 			}
 			break;
@@ -15289,7 +15315,16 @@ void CvPlayerAI::AI_updateNextBuyUnit(bool bPriceLimit)
 				UnitTypes eLoopUnit = ((UnitTypes)(GC.getCivilizationInfo(getCivilizationType()).getCivilizationUnits(iI)));
 				if (eLoopUnit != NO_UNIT)
 				{
+
 					const CvUnitInfo& kUnitInfo = GC.getUnitInfo(eLoopUnit);
+
+					if (kUnitInfo.getCombat() == 27 && eLoopUnitAI == UNITAI_SCOUT)
+					{
+						// Sloop
+						volatile int r = 0;
+						r++;
+					}
+
 					if (kUnitInfo.getDefaultProfession() == NO_PROFESSION || kUnitInfo.getDefaultUnitAIType() == UNITAI_DEFENSIVE || kUnitInfo.getDefaultUnitAIType() == UNITAI_COUNTER)
 					{
 						int iPrice = getEuropeUnitBuyPrice(eLoopUnit);

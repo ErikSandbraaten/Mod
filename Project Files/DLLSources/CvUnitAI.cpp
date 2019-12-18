@@ -418,7 +418,6 @@ bool CvUnitAI::AI_europeUpdate()
 		case UNITAI_SETTLER:
 		case UNITAI_WORKER:
 		case UNITAI_MISSIONARY:
-		case UNITAI_SCOUT:
 		case UNITAI_WAGON:
 		case UNITAI_TREASURE:
 		case UNITAI_YIELD:
@@ -429,6 +428,7 @@ bool CvUnitAI::AI_europeUpdate()
 		    break;
 		//TAC Whaling, ray
 		case UNITAI_WORKER_SEA:
+		case UNITAI_SCOUT:
 			if (getUnitTravelState() == UNIT_TRAVEL_STATE_IN_EUROPE)
 			{
 				crossOcean(UNIT_TRAVEL_STATE_FROM_EUROPE);
@@ -1857,193 +1857,239 @@ void CvUnitAI::AI_missionaryMove()
 
 void CvUnitAI::AI_scoutMove()
 {
-	CvCity* pCity = plot()->getPlotCity();
-	
-	if (AI_breakAutomation())
+	if (getDomainType() == DOMAIN_SEA)
 	{
-		return;
-	}
-	
-	if (isCargo())
-	{
-		// TAC - AI Explore from Ship endless loop fix - koma13 - START
-		/*
-		if (canUnload())
-		{
-			if (plot()->area()->getNumUnrevealedTiles(getTeam()) > 0)
-			{
-				unload();
-				return;
-			}
-		}
-		*/
-		if (AI_exploreFromShip(6))
-		{
-			return;
-		}
-		
-		if (AI_unloadWhereNeeded())
-		{
-			return;
-		}
-		/*
-		if (canUnload())
-		{
-			unload();
-			return;
-		}
-		*/
-		
-		if ((pCity != NULL) && (pCity->getOwnerINLINE() == getOwnerINLINE()))
-		{
-			AI_setUnitAIType(UNITAI_COLONIST);
-			GET_PLAYER(getOwnerINLINE()).AI_changeNumRetiredAIUnits(UNITAI_SCOUT, 1);
-		}
-		else
-		{
-			getGroup()->pushMission(MISSION_SKIP);
-		}
-		// TAC - AI Explore from Ship endless loop fix - koma13 - END	
-		
-		return;
-	}
-	
-	if (!isHuman())
-	{
-		if ((pCity != NULL) && (pCity->getOwnerINLINE() == getOwnerINLINE()))
-		{
-			if (AI_betterJob())
-			{
-				return;
-			}
-		}
-	}
-	
-	if (isCargo())
-	{
-		if (AI_unloadWhereNeeded())
-		{
-			return;
-		}
-		getGroup()->pushMission(MISSION_SKIP);
-		return;
-	}
-	
-	if (AI_heal())
-	{
-		return;
-	}
+		// TODO: Make sure that the scout ships
+		// does not get stuck in a state.
+		// It should either consider travelling further / deeper
+		// or change its UNITAI if there are no more plots to 
+		// reveal
 
-	if (pCity != NULL)
-	{
-		if (!isHuman())
+		const bool bHasCargo = getGroup()->hasCargo();
+
+		if (bHasCargo)
 		{
-			if (GET_PLAYER(getOwnerINLINE()).AI_professionSuitability(getUnitType(), getProfession()) < 100)
-			{
-				if (canClearSpecialty())
-				{
-					clearSpecialty();
-					return;
-				}
-			}
+			AI_deliverUnits();
 		}
-		if (!pCity->isScoutVisited(getTeam()))
-		{
-			if (canSpeakWithChief(plot()))
-			{
-				speakWithChief();
-				FAssert(pCity->isScoutVisited(getTeam()));
-				return;
-			}
-		}
-		if (canLearn())
-		{
-			UnitTypes eTeachUnit = getLearnUnitType(plot());
-			
-			if (GET_PLAYER(getOwnerINLINE()).AI_professionSuitability(eTeachUnit, getProfession()) > 100)
-			{
-				learn();
-				return;
-			}
-		}
-	}
-	
-	// TAC - AI Scouts - koma13 - START
-	if (AI_anyAttack(2, 75))
-	{
-		return;
-	}
-	// TAC - AI Scouts - koma13 - END
-	
-	if (AI_exploreRange(4))
-	{
-		return;
-	}
-	
-	if (AI_goody())
-	{
-		return;
-	}
-		
-	if (area()->getNumUnrevealedTiles(getTeam()) > 0)
-	{		
-		if (AI_explore())
+
+		// Erik: This code support sea based scout ships
+		// TAC - AI Scouts - koma13 - START
+		if (AI_anyAttack(2, 75))
 		{
 			return;
 		}
-	}
-	
-	if (!isHuman())
-	{
-		bool bRequestPickup = false;
-		CvPlayerAI& kOwner = GET_PLAYER(getOwnerINLINE());
-		CvArea* pLoopArea;
-		int iLoop;
-		for(pLoopArea = GC.getMapINLINE().firstArea(&iLoop); pLoopArea != NULL; pLoopArea = GC.getMapINLINE().nextArea(&iLoop))
+		// TAC - AI Scouts - koma13 - END
+		// Should propbably search for goodies within range instead before
+		// going deep into the unknown
+		const bool bIgnoreCity = true;
+		if (AI_goody(bIgnoreCity))
 		{
-			if (!pLoopArea->isWater())
-			{
-				if ((pLoopArea->getNumUnrevealedTiles(getTeam()) > 7) && pLoopArea->getNumAIUnits(getOwnerINLINE(), UNITAI_SCOUT) == 0)
-				{
-					bRequestPickup = true;
-					break;
-				}
-			}
+			return;
 		}
-		
-		if (bRequestPickup)
+		// What about water tiles vs. land tiles?
+		if (area()->getNumUnrevealedTiles(getTeam()) > 0)
 		{
-			if (AI_requestPickup())
+			if (AI_explore())
 			{
 				return;
 			}
 		}
-		
-		{	//Become a Colonist
-			if (m_pUnitInfo->getUnitAIType(UNITAI_COLONIST))
-			{
-				AI_setUnitAIType(UNITAI_COLONIST);
-				return;
-			}
+
+		if (AI_exploreRange(4))
+		{
+			return;
 		}
 	}
 	else
 	{
-		FAssert(isAutomated());
-		if (plot()->getOwnerINLINE() == getOwnerINLINE())
+		CvCity* pCity = plot()->getPlotCity();
+
+		if (AI_breakAutomation())
 		{
-			getGroup()->setAutomateType(NO_AUTOMATE);
 			return;
 		}
-	}
-	
-	if (AI_retreatToCity())
-	{
+
+		if (isCargo())
+		{
+			// TAC - AI Explore from Ship endless loop fix - koma13 - START
+			/*
+			if (canUnload())
+			{
+				if (plot()->area()->getNumUnrevealedTiles(getTeam()) > 0)
+				{
+					unload();
+					return;
+				}
+			}
+			*/
+			if (AI_exploreFromShip(6))
+			{
+				return;
+			}
+
+			if (AI_unloadWhereNeeded())
+			{
+				return;
+			}
+			/*
+			if (canUnload())
+			{
+				unload();
+				return;
+			}
+			*/
+
+			if ((pCity != NULL) && (pCity->getOwnerINLINE() == getOwnerINLINE()))
+			{
+				AI_setUnitAIType(UNITAI_COLONIST);
+				GET_PLAYER(getOwnerINLINE()).AI_changeNumRetiredAIUnits(UNITAI_SCOUT, 1);
+			}
+			else
+			{
+				getGroup()->pushMission(MISSION_SKIP);
+			}
+			// TAC - AI Explore from Ship endless loop fix - koma13 - END	
+
+			return;
+		}
+
+		if (!isHuman())
+		{
+			if ((pCity != NULL) && (pCity->getOwnerINLINE() == getOwnerINLINE()))
+			{
+				if (AI_betterJob())
+				{
+					return;
+				}
+			}
+		}
+
+		if (isCargo())
+		{
+			if (AI_unloadWhereNeeded())
+			{
+				return;
+			}
+			getGroup()->pushMission(MISSION_SKIP);
+			return;
+		}
+
+		if (AI_heal())
+		{
+			return;
+		}
+
+		if (pCity != NULL)
+		{
+			if (!isHuman())
+			{
+				if (GET_PLAYER(getOwnerINLINE()).AI_professionSuitability(getUnitType(), getProfession()) < 100)
+				{
+					if (canClearSpecialty())
+					{
+						clearSpecialty();
+						return;
+					}
+				}
+			}
+			if (!pCity->isScoutVisited(getTeam()))
+			{
+				if (canSpeakWithChief(plot()))
+				{
+					speakWithChief();
+					FAssert(pCity->isScoutVisited(getTeam()));
+					return;
+				}
+			}
+			if (canLearn())
+			{
+				UnitTypes eTeachUnit = getLearnUnitType(plot());
+
+				if (GET_PLAYER(getOwnerINLINE()).AI_professionSuitability(eTeachUnit, getProfession()) > 100)
+				{
+					learn();
+					return;
+				}
+			}
+		}
+
+		// TAC - AI Scouts - koma13 - START
+		if (AI_anyAttack(2, 75))
+		{
+			return;
+		}
+		// TAC - AI Scouts - koma13 - END
+
+		if (AI_exploreRange(4))
+		{
+			return;
+		}
+
+		if (AI_goody())
+		{
+			return;
+		}
+
+		if (area()->getNumUnrevealedTiles(getTeam()) > 0)
+		{
+			if (AI_explore())
+			{
+				return;
+			}
+		}
+
+		if (!isHuman())
+		{
+			bool bRequestPickup = false;
+			CvPlayerAI& kOwner = GET_PLAYER(getOwnerINLINE());
+			CvArea* pLoopArea;
+			int iLoop;
+			for (pLoopArea = GC.getMapINLINE().firstArea(&iLoop); pLoopArea != NULL; pLoopArea = GC.getMapINLINE().nextArea(&iLoop))
+			{
+				if (!pLoopArea->isWater())
+				{
+					if ((pLoopArea->getNumUnrevealedTiles(getTeam()) > 7) && pLoopArea->getNumAIUnits(getOwnerINLINE(), UNITAI_SCOUT) == 0)
+					{
+						bRequestPickup = true;
+						break;
+					}
+				}
+			}
+
+			if (bRequestPickup)
+			{
+				if (AI_requestPickup())
+				{
+					return;
+				}
+			}
+
+			{	//Become a Colonist
+				if (m_pUnitInfo->getUnitAIType(UNITAI_COLONIST))
+				{
+					AI_setUnitAIType(UNITAI_COLONIST);
+					return;
+				}
+			}
+		}
+		else
+		{
+			FAssert(isAutomated());
+			if (plot()->getOwnerINLINE() == getOwnerINLINE())
+			{
+				getGroup()->setAutomateType(NO_AUTOMATE);
+				return;
+			}
+		}
+
+		if (AI_retreatToCity())
+		{
+			return;
+		}
+
+		getGroup()->pushMission(MISSION_SKIP);
 		return;
 	}
-	
-	getGroup()->pushMission(MISSION_SKIP);
-	return;
 }
 
 void CvUnitAI::AI_treasureMove()
@@ -4474,6 +4520,9 @@ void CvUnitAI::AI_transportSeaMove()
 		return;
 	}
 	// TAC - AI Improved Naval AI - koma13 - END
+
+	const int iMovesLeft = movesLeft() / GC.getMOVE_DENOMINATOR();
+	AI_goodyRange(iMovesLeft, /*bIgnoreCity*/true);
 
 	if (kOwner.AI_totalUnitAIs(UNITAI_TREASURE) > 0)
 	{
@@ -11307,9 +11356,9 @@ bool CvUnitAI::AI_hide()
 	return false;
 }
 
-
+// bIgnoreCity needs to be reworded since it has the opposite effect
 // Returns true if a mission was pushed...
-bool CvUnitAI::AI_goody()
+bool CvUnitAI::AI_goody(bool bIgnoreCity)
 {
 	PROFILE_FUNC();
 
@@ -11332,7 +11381,7 @@ bool CvUnitAI::AI_goody()
 				iValue += 10000;
 			}
 			
-			if (pLoopPlot->isCity())
+			if (!bIgnoreCity && pLoopPlot->isCity())
 			{
 				if (!pLoopPlot->getPlotCity()->isScoutVisited(getTeam()))
 				{
@@ -11380,7 +11429,7 @@ bool CvUnitAI::AI_goody()
 
 }
 
-bool CvUnitAI::AI_goodyRange(int iRange)
+bool CvUnitAI::AI_goodyRange(int iRange, bool bIgnoreCity)
 {
 	PROFILE_FUNC();
 
@@ -11403,7 +11452,7 @@ bool CvUnitAI::AI_goodyRange(int iRange)
 					iValue += 10000;
 				}
 				
-				if (pLoopPlot->isCity())
+				if (!bIgnoreCity && pLoopPlot->isCity())
 				{
 					if (!pLoopPlot->getPlotCity()->isScoutVisited(getTeam()))
 					{
