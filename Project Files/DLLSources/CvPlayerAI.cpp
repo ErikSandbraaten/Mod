@@ -5014,16 +5014,17 @@ int CvPlayerAI::AI_unitGoldValue(UnitTypes eUnit, UnitAITypes eUnitAI, CvArea* p
 			// Bombard is not useful for a scout
 			iTempValue -= kUnitInfo.getBombardRate() * 50;
 
-			// Prevent ships with large cargo capacity to act as scouts
-			const int iBaseLineCargoSpace = 1;
+			// Cargo space beyond 1 hold is not useful for a scout
+			const int iCargoFactor = std::max(0, kUnitInfo.getCargoSpace() -1);
 
-			iTempValue -= std::max(0, (kUnitInfo.getCargoSpace() - iBaseLineCargoSpace)) * 50;
+			iTempValue -=(iCargoFactor* iCargoFactor) * 50;
 
-			// Don't want a privateer for exploring
+			// Don't want a privateer scout
 			if (kUnitInfo.isHiddenNationality())
 			{
 				iTempValue /= 4;
 			}
+			iTempValue += kUnitInfo.getMoves() * 100;
 
 			iValue += iTempValue;
 		}
@@ -10856,8 +10857,8 @@ int CvPlayerAI::AI_unitAIValueMultipler(UnitAITypes eUnitAI)
 						}
 					}
 
-					iValue = iValue / (iCount + 1);
-					iValue = 100000;
+					iValue = iTotalUnexploredPlots / ((iCount * iCount) + 1);
+					//iValue = 100000;
 				}
 			}
 			break;
