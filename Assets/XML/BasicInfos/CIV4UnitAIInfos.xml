@@ -98,5 +98,9 @@
             <Type>UNITAI_TRANSPORT_COAST</Type>
             <Description>UNITAI_TRANSPORT_COAST</Description>
         </UnitAIInfo>
+        <UnitAIInfo>
+            <Type>UNITAI_SCOUT_SEA</Type>
+            <Description>UNITAI_SCOUT_SEA</Description>
+        </UnitAIInfo>
     </UnitAIInfos>
 </Civ4UnitAIInfos>

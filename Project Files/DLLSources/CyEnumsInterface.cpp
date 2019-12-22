@@ -850,6 +850,7 @@ void CyEnumsPythonInterface()
 		.value("UNITAI_PIRATE_SEA", UNITAI_PIRATE_SEA)
 		.value("UNITAI_ESCORT_SEA", UNITAI_ESCORT_SEA) // TAC - AI Escort Sea - koma13
 		.value("UNITAI_TRANSPORT_COAST", UNITAI_TRANSPORT_COAST)
+		.value("UNITAI_SCOUT_SEA", UNITAI_SCOUT_SEA)
 		.value("NUM_UNITAI_TYPES", NUM_UNITAI_TYPES)
 		;
 	python::enum_<InvisibleTypes>("InvisibleTypes")

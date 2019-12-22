@@ -1290,6 +1290,7 @@ DomainTypes CvPlayerAI::AI_unitAIDomainType(UnitAITypes eUnitAI) const
 	case UNITAI_COMBAT_SEA:
 	case UNITAI_PIRATE_SEA:
 	case UNITAI_ESCORT_SEA:		// TAC - AI Escort Sea - koma13
+	case UNITAI_SCOUT_SEA:
 		return DOMAIN_SEA;
 		break;
 
@@ -1341,6 +1342,7 @@ bool CvPlayerAI::AI_unitAIIsCombat(UnitAITypes eUnitAI) const
 	case UNITAI_COMBAT_SEA:
 	case UNITAI_PIRATE_SEA:
 	case UNITAI_ESCORT_SEA: // TAC - AI Escort Sea - koma13
+	case UNITAI_SCOUT_SEA: // TAC - AI Escort Sea - koma13
 		return true;
 		break;
 
@@ -4855,21 +4857,23 @@ int CvPlayerAI::AI_unitGoldValue(UnitTypes eUnit, UnitAITypes eUnitAI, CvArea* p
 		case UNITAI_ANIMAL: // R&R, ray, Wild Animals
 		case UNITAI_ANIMAL_SEA: // R&R, ray, Wild Animals
 		case UNITAI_FLEEING: // R&R, ray, Fleeing Units
-			break;
-
 		case UNITAI_COLONIST:
 		case UNITAI_SETTLER:
 		case UNITAI_WORKER:
 		case UNITAI_MISSIONARY:
 			break;
 		case UNITAI_SCOUT:
-			if (kUnitInfo.getDomainType() == DOMAIN_LAND && kUnitInfo.getDefaultProfession() != NO_PROFESSION || 
-				kUnitInfo.getDomainType() == DOMAIN_SEA)
+			if (kUnitInfo.getDomainType() == DOMAIN_LAND && kUnitInfo.getDefaultProfession() != NO_PROFESSION)
 			{
 				bValid = true;
 			}
 			break;
-
+		case UNITAI_SCOUT_SEA:
+			if (kUnitInfo.getDomainType() == DOMAIN_SEA)
+			{
+				bValid = true;
+			}
+			break;
 		case UNITAI_WAGON:
 			if (kUnitInfo.getCargoSpace() > 0)
 			{
@@ -4999,14 +5003,14 @@ int CvPlayerAI::AI_unitGoldValue(UnitTypes eUnit, UnitAITypes eUnitAI, CvArea* p
 	case UNITAI_ANIMAL: // R&R, ray, Wild Animals
 	case UNITAI_ANIMAL_SEA: // R&R, ray, Wild Animals
 	case UNITAI_FLEEING: // R&R, ray, Fleeing Units
-		break;
-
 	case UNITAI_COLONIST:
 	case UNITAI_SETTLER:
 	case UNITAI_WORKER:
 	case UNITAI_MISSIONARY:
-		break;
 	case UNITAI_SCOUT:
+		break;
+
+	case UNITAI_SCOUT_SEA:
 		if (kUnitInfo.getDomainType() == DOMAIN_SEA)
 		{
 			iTempValue = iOffenseCombatValue / 2;
@@ -10674,6 +10678,7 @@ int CvPlayerAI::AI_professionValue(ProfessionTypes eProfession, UnitAITypes eUni
 		case UNITAI_COMBAT_SEA:
 		case UNITAI_PIRATE_SEA:
 		case UNITAI_ESCORT_SEA: // TAC - AI Escort Sea - koma13
+		case UNITAI_SCOUT_SEA:
 			break;
 		default:
 			FAssert(false);
@@ -10824,19 +10829,37 @@ int CvPlayerAI::AI_unitAIValueMultipler(UnitAITypes eUnitAI)
 			}
 			break;
 
+		case UNITAI_SCOUT_SEA:
+			if (!AI_isStrategy(STRATEGY_REVOLUTION_PREPARING))
+			{
+				int iTotalUnexploredWaterPlots = 0;
+
+				CvArea* pLoopArea;
+				int iLoop;
+				for(pLoopArea = GC.getMapINLINE().firstArea(&iLoop); pLoopArea != NULL; pLoopArea = GC.getMapINLINE().nextArea(&iLoop))
+				{
+					if (pLoopArea->isWater())
+					{
+						iTotalUnexploredWaterPlots += pLoopArea->getNumRevealedTiles(getTeam());
+					}
+				}
+
+				iValue = iTotalUnexploredWaterPlots / ((iCount * iCount) + 1);
+			}
+		break;
 		case UNITAI_SCOUT:
 			if (!AI_isStrategy(STRATEGY_REVOLUTION_PREPARING))
 			{
-				//if (iCount <= 1)
+				// Original land scout 
+				if (iCount <= 1)
 				{
 					int iTotalUnexploredPlots = 0;
 
 					CvArea* pLoopArea;
 					int iLoop;
-					for(pLoopArea = GC.getMapINLINE().firstArea(&iLoop); pLoopArea != NULL; pLoopArea = GC.getMapINLINE().nextArea(&iLoop))
+					for (pLoopArea = GC.getMapINLINE().firstArea(&iLoop); pLoopArea != NULL; pLoopArea = GC.getMapINLINE().nextArea(&iLoop))
 					{
-						// TODO: count water and land separately
-						//if (!(pLoopArea->isWater()))
+						if (!(pLoopArea->isWater()))
 						{
 							iTotalUnexploredPlots += pLoopArea->getNumRevealedTiles(getTeam());
 						}
@@ -10854,11 +10877,9 @@ int CvPlayerAI::AI_unitAIValueMultipler(UnitAITypes eUnitAI)
 							{
 								iValue = 150;
 							}
+
 						}
 					}
-
-					iValue = iTotalUnexploredPlots / ((iCount * iCount) + 1);
-					//iValue = 100000;
 				}
 			}
 			break;
@@ -15240,7 +15261,7 @@ void CvPlayerAI::AI_updateNextBuyUnit(bool bPriceLimit)
 
 		UnitAITypes eLoopUnitAI = (UnitAITypes) iUnitAI;
 		bool bValid = false;
-
+		
 		int iMultipler = AI_unitAIValueMultipler(eLoopUnitAI);
 		if (iMultipler > 0)
 		{

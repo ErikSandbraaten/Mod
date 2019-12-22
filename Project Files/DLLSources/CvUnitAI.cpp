@@ -233,6 +233,10 @@ bool CvUnitAI::AI_update()
 			case UNITAI_SCOUT:
 				AI_scoutMove();
 				break;
+
+			case UNITAI_SCOUT_SEA:
+				AI_scoutSeaMove();
+				break;
 				
 			case UNITAI_WAGON:
 				AI_transportMoveFull();
@@ -484,6 +488,7 @@ bool CvUnitAI::AI_europeUpdate()
 			break;
 		case UNITAI_PIRATE_SEA:
 		case UNITAI_ESCORT_SEA:		// TAC - AI Escort Sea - koma13
+		case UNITAI_SCOUT_SEA:
 			crossOcean(UNIT_TRAVEL_STATE_FROM_EUROPE);
 		    break;
 		
@@ -724,6 +729,10 @@ int CvUnitAI::AI_groupFirstVal()
 		return 1;
 		break;
 	// TAC - AI Escort Sea - koma13 - START
+
+	case UNITAI_SCOUT_SEA:
+		return 31;
+		break;
 
 	default:
 		FAssert(false);
@@ -1857,50 +1866,6 @@ void CvUnitAI::AI_missionaryMove()
 
 void CvUnitAI::AI_scoutMove()
 {
-	if (getDomainType() == DOMAIN_SEA)
-	{
-		// TODO: Make sure that the scout ships
-		// does not get stuck in a state.
-		// It should either consider travelling further / deeper
-		// or change its UNITAI if there are no more plots to 
-		// reveal
-
-		const bool bHasCargo = getGroup()->hasCargo();
-
-		if (bHasCargo)
-		{
-			AI_deliverUnits();
-		}
-
-		// Erik: This code support sea based scout ships
-		// TAC - AI Scouts - koma13 - START
-		if (AI_anyAttack(2, 75))
-		{
-			return;
-		}
-		// TAC - AI Scouts - koma13 - END
-		// Should propbably search for goodies within range instead before
-		// going deep into the unknown
-		const bool bIgnoreCity = true;
-		if (AI_goody(bIgnoreCity))
-		{
-			return;
-		}
-		// What about water tiles vs. land tiles?
-		if (area()->getNumUnrevealedTiles(getTeam()) > 0)
-		{
-			if (AI_explore())
-			{
-				return;
-			}
-		}
-
-		if (AI_exploreRange(4))
-		{
-			return;
-		}
-	}
-	else
 	{
 		CvCity* pCity = plot()->getPlotCity();
 
@@ -2088,6 +2053,53 @@ void CvUnitAI::AI_scoutMove()
 		}
 
 		getGroup()->pushMission(MISSION_SKIP);
+		return;
+	}
+}
+
+void CvUnitAI::AI_scoutSeaMove()
+{
+	// TODO: Make sure that the scout ships
+	// does not get stuck in a state.
+	// It should either consider travelling further / deeper
+	// or change its UNITAI if there are no more plots to 
+	// reveal
+
+	const bool bHasCargo = getGroup()->hasCargo();
+
+	if (bHasCargo)
+	{
+		if (AI_deliverUnits())
+		{
+			return;
+		}
+	}
+
+	// Erik: This code support sea based scout ships
+	// TAC - AI Scouts - koma13 - START
+	if (AI_anyAttack(2, 75))
+	{
+		return;
+	}
+	// TAC - AI Scouts - koma13 - END
+	// Should propbably search for goodies within range instead before
+	// going deep into the unknown
+	const bool bIgnoreCity = true;
+	if (AI_goody(bIgnoreCity))
+	{
+		return;
+	}
+	// What about water tiles vs. land tiles?
+	if (area()->getNumUnrevealedTiles(getTeam()) > 0)
+	{
+		if (AI_explore())
+		{
+			return;
+		}
+	}
+
+	if (AI_exploreRange(4))
+	{
 		return;
 	}
 }

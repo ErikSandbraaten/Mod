@@ -1834,6 +1834,7 @@ void getUnitAIString(CvWString& szString, UnitAITypes eUnitAI)
 	case UNITAI_COMBAT_SEA: szString = L"combat sea"; break;
 	case UNITAI_PIRATE_SEA: szString = L"pirate sea"; break;
 	case UNITAI_ESCORT_SEA: szString = L"escort sea"; break;	// TAC - AI Escort Sea - koma13
+	case UNITAI_SCOUT_SEA: szString = L"scout sea sea"; break;
 	default: szString = CvWString::format(L"unknown(%d)", eUnitAI); break;
 	}
 }

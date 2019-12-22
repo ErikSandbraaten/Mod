@@ -116,6 +116,7 @@ protected:
 	void AI_workerMove();
 	void AI_missionaryMove();
 	void AI_scoutMove();
+	void AI_scoutSeaMove();
 	void AI_treasureMove();
 	void AI_yieldUhMove();
 	void AI_generalMove();

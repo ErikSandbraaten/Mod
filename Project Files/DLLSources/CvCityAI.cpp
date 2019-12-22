@@ -659,6 +659,7 @@ UnitTypes CvCityAI::AI_bestUnit(bool bAsync, UnitAITypes* peBestUnitAI, bool bPi
 			case UNITAI_WORKER_SEA:
 			case UNITAI_TRANSPORT_SEA:
 			case UNITAI_PIRATE_SEA:
+			case UNITAI_SCOUT_SEA:
 				if (GET_PLAYER(getOwnerINLINE()).AI_unitAIValueMultipler((UnitAITypes)iI) == 0)
 				{
 					aiUnitAIVal[iI] = 0;

@@ -621,6 +621,7 @@ bool CvSelectionGroupAI::AI_isDeclareWar(const CvPlot* pPlot)
 			case UNITAI_COMBAT_SEA:
 			case UNITAI_PIRATE_SEA:
 			case UNITAI_ESCORT_SEA:			// TAC - AI Escort Sea - koma13
+			case UNITAI_SCOUT_SEA:
 				return true;
 				break;
 
