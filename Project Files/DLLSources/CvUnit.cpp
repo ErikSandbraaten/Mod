@@ -2676,10 +2676,11 @@ void CvUnit::doCommand(CommandTypes eCommand, int iData1, int iData2)
 }
 
 
-FAStarNode* CvUnit::getPathLastNode() const
+// Disabled by K-Mod. (This function is deprecated.)
+/* FAStarNode* CvUnit::getPathLastNode() const
 {
-	return getGroup()->getPathLastNode();
-}
+return getGroup()->getPathLastNode();
+} */
 
 
 CvPlot* CvUnit::getPathEndTurnPlot() const
@@ -2699,12 +2700,30 @@ bool CvUnit::generatePath(const CvPlot* pToPlot, int iFlags, bool bReuse, int* p
 	return getGroup()->generatePath(plot(), pToPlot, iFlags, bReuse, piPathTurns);
 }
 */
-
-bool CvUnit::generatePath(const CvPlot* pToPlot, int iFlags, bool bReuse, int* piPathTurns, bool bIgnoreDanger) const
-{
-	return getGroup()->generatePath(plot(), pToPlot, iFlags, bReuse, piPathTurns, bIgnoreDanger);
-}
 // TAC - AI Improved Naval AI - koma13 - END
+
+bool CvUnit::generatePath(const CvPlot* pToPlot, int iFlags, bool bReuse,
+	int* piPathTurns, int iMaxPath,   // <advc.128>
+	bool bUseTempFinder) const
+{
+	if (!bUseTempFinder) // </advc.128>
+		return getGroup()->generatePath(plot(), pToPlot, iFlags, bReuse, piPathTurns, iMaxPath);
+	// <advc.128>
+	FAssert(!bReuse);
+	KmodPathFinder temp_finder;
+	temp_finder.SetSettings(getGroup(), iFlags, iMaxPath, GC.getMOVE_DENOMINATOR());
+	bool r = temp_finder.GeneratePath(pToPlot);
+	if (piPathTurns != NULL)
+		*piPathTurns = temp_finder.GetPathTurns();
+	return r; // </advc.128>
+}
+
+// K-Mod. Return the standard pathfinder, for extracting path information.
+KmodPathFinder& CvUnit::getPathFinder() const
+{
+	return CvSelectionGroup::path_finder;
+}
+// K-Mod end
 
 bool CvUnit::canEnterTerritory(PlayerTypes ePlayer, bool bIgnoreRightOfPassage) const
 {
@@ -10163,7 +10182,7 @@ CvPlot* CvUnit::plot() const
 	}
 	else
 	{
-		return GC.getMapINLINE().plotSorenINLINE(getX_INLINE(), getY_INLINE());
+		return GC.getMapINLINE().plotSoren(getX_INLINE(), getY_INLINE());
 	}
 }
 
@@ -10463,7 +10482,7 @@ void CvUnit::changeCargo(int iChange)
 
 CvPlot* CvUnit::getAttackPlot() const
 {
-	return GC.getMapINLINE().plotSorenINLINE(m_iAttackPlotX, m_iAttackPlotY);
+	return GC.getMapINLINE().plotSoren(m_iAttackPlotX, m_iAttackPlotY);
 }
 
 
