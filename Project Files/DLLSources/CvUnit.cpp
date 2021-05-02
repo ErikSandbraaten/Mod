@@ -1121,7 +1121,7 @@ void CvUnit::updateCombat(bool bQuick)
 					CvPlot* pAdjacentPlot = pAdjacentPlot = plotDirection(pDefenderPlot->getX_INLINE(), pDefenderPlot->getY_INLINE(), ((DirectionTypes)iI));
 
 					// Determine if we can escape to this plot
-					if (pAdjacentPlot != NULL && pDefender->canMoveInto(pAdjacentPlot))
+					if (pAdjacentPlot != NULL && pDefender->canMoveInto(*pAdjacentPlot))
 					{
 						pEjectPlot = pAdjacentPlot;
 						break;
@@ -2904,21 +2904,21 @@ bool CvUnit::canMoveInto(CvPlot const& kPlot, bool bAttack, bool bDeclareWar, bo
 			bool bLandUnitMayPassLargeRiverDueToProfession = false;
 			bool bLandUnitMayBeLoaded = false;
 
-			if (getDomainType() == DOMAIN_LAND && pPlot->getTerrainType() == TERRAIN_LARGE_RIVERS)
+			if (getDomainType() == DOMAIN_LAND && kPlot.getTerrainType() == TERRAIN_LARGE_RIVERS)
 			{
-				bLandUnitMayPassLargeRiverDueToImprovement = (pPlot->getImprovementType() != NO_IMPROVEMENT && GC.getImprovementInfo(pPlot->getImprovementType()).getTerrainMakesValid(TERRAIN_LARGE_RIVERS));
-				bLandUnitMayPassLargeRiverDueToTerrainFeature = (pPlot->getFeatureType() != NO_FEATURE && GC.getFeatureInfo(pPlot->getFeatureType()).isTerrain(TERRAIN_LARGE_RIVERS));
+				bLandUnitMayPassLargeRiverDueToImprovement = (kPlot.getImprovementType() != NO_IMPROVEMENT && GC.getImprovementInfo(kPlot.getImprovementType()).getTerrainMakesValid(TERRAIN_LARGE_RIVERS));
+				bLandUnitMayPassLargeRiverDueToTerrainFeature = (kPlot.getFeatureType() != NO_FEATURE && GC.getFeatureInfo(kPlot.getFeatureType()).isTerrain(TERRAIN_LARGE_RIVERS));
 				bLandUnitMayPassLargeRiverDueToProfession = (getProfession() != NO_PROFESSION && GC.getProfessionInfo(getProfession()).isCanCrossLargeRivers());
-				bLandUnitMayBeLoaded = canLoad(pPlot, false);
+				bLandUnitMayBeLoaded = canLoad(&kPlot, false);
 			}
 
 
 			// stop large ships from entering Large Rivers in own Terrain
 			// if (DOMAIN_SEA != getDomainType() || ePlotTeam != getTeam()) // sea units can enter impassable in own cultural borders
-			if (DOMAIN_SEA != getDomainType() || ePlotTeam != getTeam() || pPlot->getTerrainType() == TERRAIN_LARGE_RIVERS)
+			if (DOMAIN_SEA != getDomainType() || ePlotTeam != getTeam() || kPlot.getTerrainType() == TERRAIN_LARGE_RIVERS)
 			{
 				// if (bIgnoreLoad || !canLoad(pPlot, true))
-				if (bIgnoreLoad || !canLoad(pPlot, true))
+				if (bIgnoreLoad || !canLoad(&kPlot, true))
 				{
 					if (bLandUnitMayPassLargeRiverDueToImprovement == false && bLandUnitMayPassLargeRiverDueToTerrainFeature == false && bLandUnitMayPassLargeRiverDueToProfession == false && bLandUnitMayBeLoaded == false)
 					{
@@ -2997,7 +2997,7 @@ bool CvUnit::canMoveInto(CvPlot const& kPlot, bool bAttack, bool bDeclareWar, bo
 		if (m_pUnitInfo->isAnimal())
 		{
 			//WTP, Protected Hostile Goodies - small adaptation
-			if (pPlot->isFort() || pPlot->isMonastery() || pPlot->isCity() || pPlot->isGoodyForSpawningHostileCriminals() || pPlot->isGoodyForSpawningHostileNatives())
+			if (kPlot.isFort() || kPlot.isMonastery() || kPlot.isCity() || kPlot.isGoodyForSpawningHostileCriminals() || kPlot.isGoodyForSpawningHostileNatives())
 			{
 				return false;
 			}
@@ -3030,7 +3030,7 @@ bool CvUnit::canMoveInto(CvPlot const& kPlot, bool bAttack, bool bDeclareWar, bo
 				// allowing all Land Units to enter Large Rivers
 				// further below we will code exceptions - Maybe also configure in XML
 				//return false;
-				if(pPlot->getTerrainType() != TERRAIN_LARGE_RIVERS)
+				if(kPlot.getTerrainType() != TERRAIN_LARGE_RIVERS)
 				{
 					return false;
 				}
