@@ -274,13 +274,13 @@ bool CvUnitAI::AI_update()
 					AI_imperialCannonMove();
 				}
 				//WTP, Protected Hostile Goodies - START
-				if (GC.getGameINLINE().getBarbarianPlayer() == getOwnerINLINE())
+				else if (GC.getGameINLINE().getBarbarianPlayer() == getOwnerINLINE())
 				{
 					if(plot()->isGoodyForSpawningHostileCriminals() || plot()->isGoodyForSpawningHostileNatives())
 					{
-						if(plot()->getNumDefenders(getOwnerINLINE()) <= 2)
+						if (plot()->getNumDefenders(getOwnerINLINE()) <= 2)
 						{
-							getGroup()->pushMission(MISSION_FORTIFY);
+							getGroup()->pushMission(MISSION_SKIP);
 							return true;
 						}
 					}
