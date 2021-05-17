@@ -1118,8 +1118,7 @@ public:
 	void sortEuropeUnits();
 
 	// Clean this up
-	// TODO: Use the proper type
-	std::vector<int> m_validCityJobProfessions;
+	std::vector<ProfessionTypes> m_validCityJobProfessions;
 };
 
 // cache CvPlayer::getYieldEquipmentAmount - start - Nightinggale
