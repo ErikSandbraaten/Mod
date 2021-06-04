@@ -11730,7 +11730,7 @@ int CvPlayerAI::AI_setUnitAIStatesRange(CvPlot* pPlot, int iRange, UnitAIStates 
 
 					if ((eValidUnitAIState == NO_UNITAI_STATE) || (pLoopUnit->AI_getUnitAIState() == eValidUnitAIState))
 					{
-						if (std::find(validUnitAITypes.begin(), validUnitAITypes.end(), pLoopUnit->AI_getUnitAIType()) != validUnitAITypes.end())
+						if (std::find(validUnitAITypes.begin(), validUnitAITypes.end(), pLoopUnit->AI_getUnitAIType()) == validUnitAITypes.end())
 						{
 							pLoopUnit->AI_setUnitAIState(eNewUnitAIState);
 							iCount++;
@@ -12440,7 +12440,8 @@ void CvPlayerAI::AI_doMilitaryStrategy()
 
 	std::vector<UnitAITypes> militaryUnitAIs;
 
-	militaryUnitAIs.push_back(UNITAI_COUNTER);
+	// Counter units do not make use of UnitAIStates
+	//militaryUnitAIs.push_back(UNITAI_COUNTER);
 	militaryUnitAIs.push_back(UNITAI_OFFENSIVE);
 
 	CvTeamAI& kTeam = GET_TEAM(getTeam());
