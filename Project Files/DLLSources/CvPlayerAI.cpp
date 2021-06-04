@@ -27,6 +27,8 @@
 #include "CvTradeRoute.h"
 
 #include "CvSavegame.h"
+#include "BetterBTSAI.h"
+
 #pragma push_macro("free")  
 #pragma push_macro("new")  
 #undef free
@@ -7996,6 +7998,9 @@ void CvPlayerAI::AI_doProfessions()
 						{
 							pLoopCity->removePopulationUnit(pBestUnit, false, eProfession);
 							pBestUnit->AI_setUnitAIType(eUnitAI);
+							if (gPlayerLogLevel >= 1) logBBAI("CvPlayerAI::AI_doProfessions Player (%S)'s City (%S) emits civilian Unit (%S)",
+								getCivilizationDescription(), pLoopCity->getNameKey(), pBestUnit->getNameOrProfessionKey());
+
 						}
 					}
 				}
@@ -8062,6 +8067,8 @@ void CvPlayerAI::AI_doProfessions()
 						{
 							pLoopCity->removePopulationUnit(pBestUnit, false, eProfession);
 							pBestUnit->AI_setUnitAIType(UNITAI_DEFENSIVE);
+							if (gPlayerLogLevel >= 1) logBBAI("CvPlayerAI::AI_doProfessions Player (%S)'s City (%S) emits military Unit (%S)",
+								getCivilizationDescription(), pLoopCity->getNameKey(), pBestUnit->getNameOrProfessionKey());
 						}
 						else
 						{
