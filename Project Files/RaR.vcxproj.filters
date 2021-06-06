@@ -457,6 +457,9 @@
     <ClCompile Include="DLLSources\CyDataInterface.cpp">
       <Filter>Python\CPP</Filter>
     </ClCompile>
+    <ClCompile Include="PlotRadiusIterator.cpp">
+      <Filter>CV\CPP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DLLSources\CvArea.h">
@@ -838,6 +841,9 @@
       <Filter>Python\Header</Filter>
     </ClInclude>
     <ClInclude Include="DLLSources\NetworkDataPacking.h">
+      <Filter>CV\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="PlotRadiusIterator.h">
       <Filter>CV\Header</Filter>
     </ClInclude>
   </ItemGroup>
