@@ -828,15 +828,6 @@ int* CvGlobals::getCityPlotPriority()
 	return m_aiCityPlotPriority;
 }
 
-int CvGlobals::getXYCityPlot(int i, int j)
-{
-	FAssertMsg(i < CITY_PLOTS_DIAMETER, "Index out of bounds");
-	FAssertMsg(i > -1, "Index out of bounds");
-	FAssertMsg(j < CITY_PLOTS_DIAMETER, "Index out of bounds");
-	FAssertMsg(j > -1, "Index out of bounds");
-	return m_aaiXYCityPlot[i + (CITY_PLOTS_DIAMETER * j)];
-}
-
 DirectionTypes* CvGlobals::getTurnLeftDirection()
 {
 	return m_aeTurnLeftDirection;

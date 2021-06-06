@@ -1278,6 +1278,8 @@ void CvGameTextMgr::setPlotListHelp(CvWStringBuffer &szString, const CvPlot* pPl
 {
 	PROFILE_FUNC();
 
+	CvMap const& m = GC.getMap();
+
 	int numPromotionInfos = GC.getNumPromotionInfos();
 
 	// if cheatmode and ctrl, display grouping info instead
@@ -1400,7 +1402,7 @@ void CvGameTextMgr::setPlotListHelp(CvWStringBuffer &szString, const CvPlot* pPl
 
 								if (!pMissionPlot->isCity())
 								{
-									DirectionTypes eDirection = estimateDirection(dxWrap(pMissionPlot->getX_INLINE() - pCity->plot()->getX_INLINE()), dyWrap(pMissionPlot->getY_INLINE() - pCity->plot()->getY_INLINE()));
+									DirectionTypes eDirection = estimateDirection(m.dxWrap(pMissionPlot->getX_INLINE() - pCity->plot()->getX_INLINE()), m.dyWrap(pMissionPlot->getY_INLINE() - pCity->plot()->getY_INLINE()));
 
 									getDirectionTypeString(szTempString, eDirection);
 									szString.append(CvWString::format(L"%s of ", szTempString.GetCString()));
@@ -1412,7 +1414,9 @@ void CvGameTextMgr::setPlotListHelp(CvWStringBuffer &szString, const CvPlot* pPl
 							{
 								if (pMissionPlot != pPlot)
 								{
-									DirectionTypes eDirection = estimateDirection(dxWrap(pMissionPlot->getX_INLINE() - pPlot->getX_INLINE()), dyWrap(pMissionPlot->getY_INLINE() - pPlot->getY_INLINE()));
+									CvMap const& m = GC.getMap();
+
+									DirectionTypes eDirection = estimateDirection(m.dxWrap(pMissionPlot->getX_INLINE() - pPlot->getX_INLINE()), m.dyWrap(pMissionPlot->getY_INLINE() - pPlot->getY_INLINE()));
 
 									getDirectionTypeString(szTempString, eDirection);
 									szString.append(CvWString::format(L" (%s)", szTempString.GetCString()));

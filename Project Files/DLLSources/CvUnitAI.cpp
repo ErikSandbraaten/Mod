@@ -17,6 +17,7 @@
 #include "CvInfos.h"
 #include "FProfiler.h"
 #include "FAStarNode.h"
+#include "PlotRadiusIterator.h"
 
 // interface uses
 #include "CvDLLInterfaceIFaceBase.h"
@@ -11576,6 +11577,7 @@ bool CvUnitAI::AI_goody(bool bIgnoreCity)
 	int iBestValue = 0;
 	CvPlot* pBestPlot = NULL;
 	CvPlot* pBestExplorePlot = NULL;
+	CvMap const& m = GC.getMap();
 
 	for (int iI = 0; iI < GC.getMapINLINE().numPlotsINLINE(); iI++)
 	{
@@ -11612,7 +11614,7 @@ bool CvUnitAI::AI_goody(bool bIgnoreCity)
 						int iPathTurns = 0;
 						if (!atPlot(pLoopPlot) && generatePath(pLoopPlot, MOVE_NO_ENEMY_TERRITORY, true, &iPathTurns))
 						{
-							iValue += GC.getGameINLINE().getSorenRandNum(250 * abs(xDistance(getX_INLINE(), pLoopPlot->getX_INLINE())) + abs(yDistance(getY_INLINE(), pLoopPlot->getY_INLINE())), "AI explore");
+							iValue += GC.getGameINLINE().getSorenRandNum(250 * abs(m.xDistance(getX_INLINE(), pLoopPlot->getX_INLINE())) + abs(m.yDistance(getY_INLINE(), pLoopPlot->getY_INLINE())), "AI explore");
 
 							iValue /= 3 + std::max(1, iPathTurns);
 
@@ -11647,6 +11649,7 @@ bool CvUnitAI::AI_goodyRange(int iRange, bool bIgnoreCity)
 	int iBestValue = 0;
 	CvPlot* pBestPlot = NULL;
 	CvPlot* pBestExplorePlot = NULL;
+	CvMap const& m = GC.getMap();
 
 	for (int iX = -iRange; iX <= iRange; iX++)
 	{
@@ -11683,7 +11686,7 @@ bool CvUnitAI::AI_goodyRange(int iRange, bool bIgnoreCity)
 							int iPathTurns = 0;
 							if (!atPlot(pLoopPlot) && generatePath(pLoopPlot, MOVE_NO_ENEMY_TERRITORY, true, &iPathTurns))
 							{
-								iValue += GC.getGameINLINE().getSorenRandNum(250 * abs(xDistance(getX_INLINE(), pLoopPlot->getX_INLINE())) + abs(yDistance(getY_INLINE(), pLoopPlot->getY_INLINE())), "AI explore");
+								iValue += GC.getGameINLINE().getSorenRandNum(250 * abs(m.xDistance(getX_INLINE(), pLoopPlot->getX_INLINE())) + abs(m.yDistance(getY_INLINE(), pLoopPlot->getY_INLINE())), "AI explore");
 
 								iValue /= 3 + std::max(1, iPathTurns);
 
@@ -11825,6 +11828,8 @@ bool CvUnitAI::AI_explore(bool bFavorOpenBorders)
 	
 	bool bNoContact = (GC.getGameINLINE().countCivTeamsAlive() > GET_TEAM(getTeam()).getHasMetCivCount());
 
+	CvMap const& m = GC.getMap();
+
 	for (iI = 0; iI < GC.getMapINLINE().numPlotsINLINE(); iI++)
 	{
 		PROFILE("AI_explore 1");
@@ -11843,7 +11848,7 @@ bool CvUnitAI::AI_explore(bool bFavorOpenBorders)
 					{
 						if (!atPlot(pLoopPlot) && generatePath(pLoopPlot, MOVE_NO_ENEMY_TERRITORY, true, &iPathTurns))
 						{
-							iValue += GC.getGameINLINE().getSorenRandNum(250 * abs(xDistance(getX_INLINE(), pLoopPlot->getX_INLINE())) + abs(yDistance(getY_INLINE(), pLoopPlot->getY_INLINE())), "AI explore");
+							iValue += GC.getGameINLINE().getSorenRandNum(250 * abs(m.xDistance(getX_INLINE(), pLoopPlot->getX_INLINE())) + abs(m.yDistance(getY_INLINE(), pLoopPlot->getY_INLINE())), "AI explore");
 
 							if (pLoopPlot->isAdjacentToLand())
 							{

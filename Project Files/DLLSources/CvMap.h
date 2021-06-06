@@ -70,7 +70,197 @@ class CvMap
 	friend class CyMap;
 
 public:
+	// 4 | 4 | 3 | 3 | 3 | 4 | 4
+	// -------------------------
+	// 4 | 3 | 2 | 2 | 2 | 3 | 4
+	// -------------------------
+	// 3 | 2 | 1 | 1 | 1 | 2 | 3
+	// -------------------------
+	// 3 | 2 | 1 | 0 | 1 | 2 | 3
+	// -------------------------
+	// 3 | 2 | 1 | 1 | 1 | 2 | 3
+	// -------------------------
+	// 4 | 3 | 2 | 2 | 2 | 3 | 4
+	// -------------------------
+	// 4 | 4 | 3 | 3 | 3 | 4 | 4
+	//
+	// Returns the distance between plots according to the pattern above...
+	inline int plotDistance(int iX1, int iY1, int iX2, int iY2) const
+	{
+		int iDX = xDistance(iX1, iX2);
+		int iDY = yDistance(iY1, iY2);
+		return max(iDX, iDY) + (min(iDX, iDY) / 2);
+	}
 
+	// K-Mod, plot-to-plot alias for convenience:
+	inline int plotDistance(const CvPlot* plot1, const CvPlot* plot2) const
+	{
+		return plotDistance(
+				plot1->getX(), plot1->getY(),
+				plot2->getX(), plot2->getY());
+	}
+	// K-Mod end
+
+	// 3 | 3 | 3 | 3 | 3 | 3 | 3
+	// -------------------------
+	// 3 | 2 | 2 | 2 | 2 | 2 | 3
+	// -------------------------
+	// 3 | 2 | 1 | 1 | 1 | 2 | 3
+	// -------------------------
+	// 3 | 2 | 1 | 0 | 1 | 2 | 3
+	// -------------------------
+	// 3 | 2 | 1 | 1 | 1 | 2 | 3
+	// -------------------------
+	// 3 | 2 | 2 | 2 | 2 | 2 | 3
+	// -------------------------
+	// 3 | 3 | 3 | 3 | 3 | 3 | 3
+	//
+	// Returns the distance between plots according to the pattern above...
+	inline int stepDistance(int iX1, int iY1, int iX2, int iY2) const
+	{
+		return max(xDistance(iX1, iX2), yDistance(iY1, iY2));
+	}
+
+	// K-Mod, plot-to-plot alias for convenience:
+	inline int stepDistance(const CvPlot* plot1, const CvPlot* plot2) const
+	{
+		return stepDistance(
+			plot1->getX(), plot1->getY(),
+			plot2->getX(), plot2->getY());
+	} // K-Mod end
+
+	inline CvPlot* plotDirection(int iX, int iY, DirectionTypes eDirection) const
+	{
+		if (eDirection == NO_DIRECTION)
+			return plotValidXY(iX, iY);
+		// advc.opt: Don't check for INVALID_PLOT_COORD
+		else return plotValidXY(
+			iX + GC.getPlotDirectionX()[eDirection],
+			iY + GC.getPlotDirectionY()[eDirection]);
+	}
+
+	inline CvPlot* plotCardinalDirection(int iX, int iY, CardinalDirectionTypes eCardinalDirection) const
+	{
+		// advc.opt: Don't check for INVALID_PLOT_COORD
+		return plotValidXY(
+			iX + GC.getPlotCardinalDirectionX()[eCardinalDirection],
+			iY + GC.getPlotCardinalDirectionY()[eCardinalDirection]);
+	}
+
+	inline CvPlot* plotXY(int iX, int iY, int iDX, int iDY) const
+	{
+		// advc.opt: Don't check for INVALID_PLOT_COORD
+		return plotValidXY(iX + iDX, iY + iDY);
+	}
+	// K-Mod start
+	inline CvPlot* plotXY(const CvPlot* pPlot, int iDX, int iDY) const
+	{
+		return plotXY(pPlot->getX(), pPlot->getY(), iDX, iDY);
+	} // K-Mod end
+
+	inline DirectionTypes directionXY(int iDX, int iDY) const
+	{
+		if (abs(iDX) > DIRECTION_RADIUS || abs(iDY) > DIRECTION_RADIUS)
+			return NO_DIRECTION;
+		else return GC.getXYDirection(iDX + DIRECTION_RADIUS, iDY + DIRECTION_RADIUS);
+	}
+
+	inline DirectionTypes directionXY(CvPlot const& kFromPlot, CvPlot const& kToPlot) const // advc: take params as references
+	{
+		return directionXY(
+			dxWrap(kToPlot.getX() - kFromPlot.getX()),
+			dyWrap(kToPlot.getY() - kFromPlot.getY()));
+	}
+
+	inline int dxWrap(int iDX) const
+	{
+		return wrapCoordDifference(iDX, getGridWidth(), isWrapXInternal());
+	}
+
+	inline int dyWrap(int iDY) const
+	{
+		return wrapCoordDifference(iDY, getGridHeight(), isWrapYInternal());
+	}
+
+	inline int xDistance(int iFromX, int iToX) const
+	{
+		return coordDistance(iFromX, iToX, getGridWidth(), isWrapXInternal());
+	}
+
+	inline int yDistance(int iFromY, int iToY) const
+	{
+		return coordDistance(iFromY, iToY, getGridHeight(), isWrapYInternal());
+	}
+	inline CvPlot* plotCity(int iX, int iY, CityPlotTypes ePlot) const						// Exposed to Python (CyGameCoreUtils.py)
+	{	// advc.enum: 3rd param was int
+		// advc.opt: Don't check for INVALID_PLOT_COORD
+		return plotValidXY(iX + GC.getCityPlotX()[ePlot], iY + GC.getCityPlotY()[ePlot]);
+	}
+	CityPlotTypes plotCityXY(int iDX, int iDY) const // advc.enum: return CityPlotTypes		// Exposed to Python (CyGameCoreUtils.py)
+	{
+		if (abs(iDX) > CITY_PLOTS_RADIUS || abs(iDY) > CITY_PLOTS_RADIUS)
+			return NO_CITY_PLOT; // advc.enum
+		return GC.getXYCityPlot(iDX + CITY_PLOTS_RADIUS, iDY + CITY_PLOTS_RADIUS);
+	}
+	// advc: 1st param (CvCity*) replaced with two ints - to allow hypothetical city sites
+
+	inline CityPlotTypes plotCityXY(int iCityX, int iCityY, CvPlot const& kPlot) const		// Exposed to Python (CyGameCoreUtils.py)
+	{
+		return plotCityXY(dxWrap(kPlot.getX() - iCityX), dyWrap(kPlot.getY() - iCityY));
+	}
+	// advc:
+	inline bool adjacentOrSame(CvPlot const& kFirstPlot, CvPlot const& kSecondPlot) const
+	{
+		return (stepDistance(&kFirstPlot, &kSecondPlot) <= 1);
+	}
+
+	inline int plotCityXY(int iDX, int iDY)
+	{
+		if ((abs(iDX) > CITY_PLOTS_RADIUS) || (abs(iDY) > CITY_PLOTS_RADIUS))
+		{
+			return -1;
+		}
+		else
+		{
+			return GC.getXYCityPlot((iDX + CITY_PLOTS_RADIUS), (iDY + CITY_PLOTS_RADIUS));
+		}
+	}
+
+private: // Auxiliary functions
+		 /*	These look too large and branchy for inlining, but the keywords do seem
+		 to improve performance a little bit. Were also present in BtS. */
+
+	inline int coordDistance(int iFrom, int iTo, int iRange, bool bWrap) const
+	{
+		if (bWrap && abs(iFrom - iTo) > iRange / 2)
+			return iRange - abs(iFrom - iTo);
+		return abs(iFrom - iTo);
+	}
+
+	inline int wrapCoordDifference(int iDiff, int iRange, bool bWrap) const
+	{
+		if (!bWrap)
+			return iDiff;
+		if (iDiff > iRange / 2)
+			return iDiff - iRange;
+		else if (iDiff < -(iRange / 2))
+			return iDiff + iRange;
+		return iDiff;
+	}
+
+	inline int coordRange(int iCoord, int iRange, bool bWrap) const
+	{
+		if (!bWrap || iRange == 0)
+			return iCoord;
+		if (iCoord < 0)
+			return (iRange + (iCoord % iRange));
+		else if (iCoord >= iRange)
+			return (iCoord % iRange);
+		return iCoord;
+	}
+	// </advc.make>
+
+public:
 	CvMap();
 	virtual ~CvMap();
 
@@ -196,6 +386,10 @@ public:
 		return m_bWrapX || m_bWrapY;
 	}
 #endif
+
+	inline bool isWrapXInternal() const { return m_bWrapX; } // advc.inl
+	inline bool isWrapYInternal() const { return m_bWrapY; } // advc.inl
+
 	DllExport WorldSizeTypes getWorldSize();
 	ClimateTypes getClimate();
 	SeaLevelTypes getSeaLevel();
@@ -238,6 +432,17 @@ public:
 		FAssert(isPlot(x, y));
 		return m_pMapPlots[plotNum(x, y)];
 	} // </advc.inl>
+	/*	advc.opt: Yet another plot getter. Checks coordRange but not INVALID_PLOT_COORD.
+		For functions that compute x,y as an offset from a (valid) plot -
+		not plausible that the new coordinates would equal INVALID_PLOT_COORD.
+		'inline' tested - faster without it. */
+	CvPlot* plotValidXY(int iX, int iY) const
+	{
+		int iMapX = coordRange(iX, getGridWidth(), isWrapXInternal());
+		int iMapY = coordRange(iY, getGridHeight(), isWrapYInternal());
+		return (isPlot(iMapX, iMapY) ? &m_pMapPlots[plotNum(iMapX, iMapY)] : NULL);
+	}
+
 #endif
 	DllExport CvPlot* pointToPlot(float fX, float fY);
 	int getIndexAfterLastArea();
@@ -297,5 +502,54 @@ protected:
 	void calculateAreas();
 
 };
+
+/* <advc.make> Global wrappers for distance functions. */
+inline int plotDistance(int iX1, int iY1, int iX2, int iY2) {
+	return GC.getMap().plotDistance(iX1, iY1, iX2, iY2);
+}
+inline int plotDistance(const CvPlot* plot1, const CvPlot* plot2) {
+	return GC.getMap().plotDistance(plot1, plot2);
+}
+inline int stepDistance(int iX1, int iY1, int iX2, int iY2) {
+	return GC.getMap().stepDistance(iX1, iY1, iX2, iY2);
+}
+inline int stepDistance(const CvPlot* plot1, const CvPlot* plot2) {
+	return GC.getMap().stepDistance(plot1, plot2);
+}
+inline CvPlot* plotDirection(int iX, int iY, DirectionTypes eDirection) {
+	return GC.getMap().plotDirection(iX, iY, eDirection);
+}
+inline CvPlot* plotCardinalDirection(int iX, int iY, CardinalDirectionTypes eCardinalDirection) {
+	return GC.getMap().plotCardinalDirection(iX, iY, eCardinalDirection);
+}
+inline CvPlot* plotXY(int iX, int iY, int iDX, int iDY) {
+	return GC.getMap().plotXY(iX, iY, iDX, iDY);
+}
+inline CvPlot* plotXY(const CvPlot* pPlot, int iDX, int iDY) {
+	return GC.getMap().plotXY(pPlot, iDX, iDY);
+}
+inline DirectionTypes directionXY(int iDX, int iDY) {
+	return GC.getMap().directionXY(iDX, iDY);
+}
+inline DirectionTypes directionXY(const CvPlot* pFromPlot, const CvPlot* pToPlot) {
+	return GC.getMap().directionXY(*pFromPlot, *pToPlot);
+}
+inline CvPlot* plotCity(int iX, int iY, CityPlotTypes ePlot) {
+	return GC.getMap().plotCity(iX, iY, ePlot);
+}
+inline CityPlotTypes plotCityXY(int iCityX, int iCityY, CvPlot const& kPlot) {
+	return GC.getMap().plotCityXY(iCityX, iCityY, kPlot);
+}
+inline bool adjacentOrSame(CvPlot const& kFirstPlot, CvPlot const& kSecondPlot) { // advc
+	return GC.getMap().adjacentOrSame(kFirstPlot, kSecondPlot);
+}
+// </advc.make>
+// WTP: Need a version that can deal with an index rather than CityPlotTypes until we overhaul the AI functions
+inline CvPlot* plotCity(int iX, int iY, int idx) {
+	return GC.getMap().plotCity(iX, iY, static_cast<CityPlotTypes>(idx));
+}
+inline CityPlotTypes plotCityXY(const CvCity* pCity, CvPlot const& kPlot) {
+	return GC.getMap().plotCityXY(pCity->getX(), pCity->getY(), kPlot);
+}
 
 #endif

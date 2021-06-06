@@ -1418,8 +1418,11 @@ bool CvPlot::canSeePlot(CvPlot *pPlot, TeamTypes eTeam, int iRange, DirectionTyp
 	//find displacement
 	int dx = pPlot->getX() - getX();
 	int dy = pPlot->getY() - getY();
-	dx = dxWrap(dx); //world wrap
-	dy = dyWrap(dy);
+	
+	CvMap const& m = GC.getMap();
+	
+	dx = m.dxWrap(dx); //world wrap
+	dy = m.dyWrap(dy);
 
 	//check if in facing direction
 	if (shouldProcessDisplacementPlot(dx, dy, eFacingDirection))

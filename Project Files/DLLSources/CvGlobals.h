@@ -201,13 +201,20 @@ public:
 	int* getCityPlotX();
 	int* getCityPlotY();
 	int* getCityPlotPriority();
-	int getXYCityPlot(int i, int j);
 	DirectionTypes* getTurnLeftDirection();
 	DirectionTypes getTurnLeftDirection(int i);
 	DirectionTypes* getTurnRightDirection();
 	DirectionTypes getTurnRightDirection(int i);
 	DllExport DirectionTypes getXYDirection(int i, int j);
 
+	inline CityPlotTypes getXYCityPlot(int i, int j) const // advc.enum: return type was int
+	{
+		FAssertMsg(i < CITY_PLOTS_DIAMETER, "Index out of bounds");
+		FAssertMsg(i > -1, "Index out of bounds");
+		FAssertMsg(j < CITY_PLOTS_DIAMETER, "Index out of bounds");
+		FAssertMsg(j > -1, "Index out of bounds");
+		return static_cast<CityPlotTypes>(m_aaiXYCityPlot[i + (CITY_PLOTS_DIAMETER * j)]);
+	}
 	//
 	// Global Infos
 	// All info type strings are upper case and are kept in this hash map for fast lookup

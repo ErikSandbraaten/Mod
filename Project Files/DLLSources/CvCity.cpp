@@ -973,7 +973,7 @@ void CvCity::chooseProduction(UnitTypes eTrainUnit, BuildingTypes eConstructBuil
 
 int CvCity::getCityPlotIndex(const CvPlot* pPlot) const
 {
-	return plotCityXY(this, pPlot);
+	return plotCityXY(this, *pPlot);
 }
 
 

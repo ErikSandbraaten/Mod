@@ -37,28 +37,6 @@
 // R&R, Robert Surcouf, Damage on Storm plots, End
 #define PATH_COMBAT_WEIGHT								(300) // K-Mod. penalty for having to fight along the way.
 
-CvPlot* plotCity(int iX, int iY, int iIndex)
-{
-	return GC.getMapINLINE().plotINLINE((iX + GC.getCityPlotX()[iIndex]), (iY + GC.getCityPlotY()[iIndex]));
-}
-
-int plotCityXY(int iDX, int iDY)
-{
-	if ((abs(iDX) > CITY_PLOTS_RADIUS) || (abs(iDY) > CITY_PLOTS_RADIUS))
-	{
-		return -1;
-	}
-	else
-	{
-		return GC.getXYCityPlot((iDX + CITY_PLOTS_RADIUS), (iDY + CITY_PLOTS_RADIUS));
-	}
-}
-
-int plotCityXY(const CvCity* pCity, const CvPlot* pPlot)
-{
-	return plotCityXY(dxWrap(pPlot->getX_INLINE() - pCity->getX_INLINE()), dyWrap(pPlot->getY_INLINE() - pCity->getY_INLINE()));
-}
-
 bool isLeaderCivMatch(LeaderHeadTypes eLeader, CivilizationTypes eCiv, bool bHuman)
 {
 	CvCivilizationInfo& kCivilization = GC.getCivilizationInfo(eCiv);
@@ -148,7 +126,12 @@ DirectionTypes estimateDirection(int iDX, int iDY)
 
 DirectionTypes estimateDirection(const CvPlot* pFromPlot, const CvPlot* pToPlot)
 {
-	return estimateDirection(dxWrap(pToPlot->getX_INLINE() - pFromPlot->getX_INLINE()), dyWrap(pToPlot->getY_INLINE() - pFromPlot->getY_INLINE()));
+	CvMap const& m = GC.getMap();
+	return estimateDirection(
+		m.dxWrap(pToPlot->getX() - pFromPlot->getX()),
+		m.dyWrap(pToPlot->getY() - pFromPlot->getY()));
+
+	//return estimateDirection(dxWrap(pToPlot->getX_INLINE() - pFromPlot->getX_INLINE()), dyWrap(pToPlot->getY_INLINE() - pFromPlot->getY_INLINE()));
 }
 
 

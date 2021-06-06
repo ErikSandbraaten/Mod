@@ -14,11 +14,11 @@ float cyFloatRange(float fNum, float fLow, float fHigh)
 }
 int cyDxWrap(int iDX)
 {
-	return dxWrap(iDX);
+	return GC.getMap().dxWrap(iDX);
 }
 int cyDyWrap(int iDY)
 {
-	return dyWrap(iDY);
+	return GC.getMap().dyWrap(iDY);
 }
 int cyPlotDistance(int iX, int iY, int iX2, int iY2)
 {
@@ -65,11 +65,11 @@ CyPlot* cyPlotCity(int iX, int iY, int iIndex)
 }
 int cyPlotCityXYFromInt(int iDX, int iDY)
 {
-	return plotCityXY(iDX, iDY);
+	return GC.getMap().plotCityXY(iDX, iDY);
 }
 int cyPlotCityXYFromCity(CyCity* pCity, CyPlot* pPlot)
 {
-	return plotCityXY(pCity->getCity(), pPlot->getPlot());
+	return plotCityXY(pCity->getCity(), *pPlot->getPlot());
 }
 CardinalDirectionTypes cyGetOppositeCardinalDirection(CardinalDirectionTypes eCardDirection)
 {
