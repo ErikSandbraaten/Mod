@@ -1109,6 +1109,7 @@ protected:
 	void resetSavedData(PlayerTypes eID = NO_PLAYER, bool bConstructorCall = false);
 
 	void doUpdateCacheOnTurn();
+	void onTurnLogging() const; // K-Mod
 
 	// transport feeder - start - Nightinggale
 public:

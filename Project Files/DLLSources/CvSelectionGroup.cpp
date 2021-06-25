@@ -4045,7 +4045,7 @@ MissionData* CvSelectionGroup::getMissionFromQueue(int iIndex) const
 	CLLNode<MissionData>* pMissionNode;
 
 	pMissionNode = m_missionQueue.nodeNum(iIndex);
-
+	   
 	if (pMissionNode != NULL)
 	{
 		return &(pMissionNode->m_data);
