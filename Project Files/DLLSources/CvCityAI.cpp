@@ -4926,15 +4926,16 @@ int CvCityAI::AI_estimateYieldValue(YieldTypes eYield, int iAmount) const
 
 				// We value the yield by what we would have had to pay for it in
 				// a port as long as we only have a small amount of it
-				const int iBaselineAmount = 50;
+				const int iBaselineAmount = GC.getGameINLINE().getCargoYieldCapacity()*2;
 
 				// We want to encourage the production of a least a small
 				// amount of any given yield since that makes it more
 				// likely that it can be used as input
 				if (getYieldStored(eYield) <= iBaselineAmount)
 				{
-					const int iBestBuyPrice = std::min(kParent.getYieldSellPrice(eYield), kParent.getYieldAfricaSellPrice(eYield));
-					iValue = iAmount * iBestBuyPrice;
+					//const int iBestBuyPrice = std::min(kParent.getYieldSellPrice(eYield), kParent.getYieldAfricaSellPrice(eYield));
+					//iValue = iAmount * iBestBuyPrice;
+					break; // Use the default player level values
 				}
 				else
 				{ 
@@ -4960,6 +4961,9 @@ int CvCityAI::AI_estimateYieldValue(YieldTypes eYield, int iAmount) const
 		{
 			const int populationMultiplier = std::max(1U, m_aPopulationUnits.size() / 5);
 			iValue = static_cast<int>(iAmount * YIELD_TOOLS_BASE_VALUE + populationMultiplier);
+
+			if (AI_isPort() || AI_isMajorCity())
+				iValue *= 1.5;
 		}
 		break;
 		case YIELD_BLADES:
@@ -4974,6 +4978,9 @@ int CvCityAI::AI_estimateYieldValue(YieldTypes eYield, int iAmount) const
 		{
 			const int populationMultiplier = std::max(1U, m_aPopulationUnits.size() / 5);
 			iValue = static_cast<int>(iAmount * YIELD_HAMMERS_BASE_VALUE + populationMultiplier);
+
+			if (AI_isPort() || AI_isMajorCity())
+				iValue *= 1.5;
 		}
 		break;
 		case YIELD_BELLS:
