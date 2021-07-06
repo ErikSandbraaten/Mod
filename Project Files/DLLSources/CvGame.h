@@ -395,6 +395,8 @@ public:
 
 	void writeDesyncLog();
 
+	int getRemainingForcedPeaceTurns() const;
+
 protected:
 
 	int m_iEndTurnMessagesSent;
