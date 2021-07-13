@@ -812,6 +812,7 @@ protected:
 	mutable EnumMapDefault<YieldTypes,int,-1> m_em_iYieldRank;
 	mutable EnumMap<YieldTypes,bool> m_em_bYieldRankValid;
 
+	bool m_bHasHurried;
 	void doGrowth();
 	void doYields();
 	void addTempHurryYieldsForProduction();
@@ -917,6 +918,9 @@ protected:
 	void cache_storageLossTradeValues_usingCachedData(BuildingTypes eBuilding);
 	void cache_storageLossTradeValues_usingRawData();
 	void updateCacheStorageLossTradingValues(BuildingTypes eBuilding, bool bWasAdded);
+	void pushOrderInternal(OrderTypes eOrder, int eBuildingOrUnit);
+	void popOrderInternal();
+
 public:
 	inline int getStorageLossSellPercentage()const					{ return m_iStorageLossSellPercentage; }
 	inline bool getIgnoresBoycott()const							{ return m_bIgnoresBoycott; }
