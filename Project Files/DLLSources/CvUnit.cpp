@@ -2880,21 +2880,36 @@ bool CvUnit::canMoveInto(CvPlot const& kPlot, bool bAttack, bool bDeclareWar, bo
 		}
 	}
 
-	CvArea *pPlotArea = kPlot.area();
+	const CvArea *const pPlotArea = kPlot.area();
 	TeamTypes ePlotTeam = kPlot.getTeam();
 	bool bCanEnterArea = canEnterArea(kPlot.getOwnerINLINE(), pPlotArea);
+	const FeatureTypes eFeature = kPlot.getFeatureType();
+	const DomainTypes eDomainType = getDomainType();
+
 	if (bCanEnterArea)
 	{
-		if (kPlot.getFeatureType() != NO_FEATURE)
+		if (eFeature != NO_FEATURE)
 		{
-			if (m_pUnitInfo->getFeatureImpassable(kPlot.getFeatureType()))
+			const CvFeatureInfo& kFeatureInfo = GC.getFeatureInfo(eFeature);
+
+			// Prevent the AI from moving through storms and sustaining damage
+			// Strictly speaking this should preferably be handled by either the path cost or a separate PF flag
+			// Also checking isGeneratedEveryRound() in case a mod-mod adds turn damage to certain plots and
+			// crossing them would be the only way to make forward progress
+			if (getGroup()->AI_isControlled() && kFeatureInfo.getTurnDamage() > 0 &&
+				kFeatureInfo.isGeneratedEveryRound())
 			{
-				if (DOMAIN_SEA != getDomainType() || kPlot.getTeam() != getTeam())  // sea units can enter impassable in own cultural borders
+				return false;
+			}
+
+			if (m_pUnitInfo->getFeatureImpassable(eFeature))
+			{
+				if (DOMAIN_SEA != eDomainType || kPlot.getTeam() != getTeam())  // sea units can enter impassable in own cultural borders
 				{
 					return false;
 				}
 				// Erik: The AI may attempt to pathfind into unrevealed ocean plots so have have to check for the plot being revealed
-				if (DOMAIN_SEA == getDomainType() && !kPlot.isRevealed(getTeam(), false))
+				if (DOMAIN_SEA == eDomainType && !kPlot.isRevealed(getTeam(), false))
 				{
 					return false;
 				}
@@ -2911,10 +2926,10 @@ bool CvUnit::canMoveInto(CvPlot const& kPlot, bool bAttack, bool bDeclareWar, bo
 			bool bLandUnitMayPassLargeRiverDueToProfession = false;
 			bool bLandUnitMayBeLoaded = false;
 
-			if (getDomainType() == DOMAIN_LAND && kPlot.getTerrainType() == TERRAIN_LARGE_RIVERS)
+			if (eDomainType == DOMAIN_LAND && kPlot.getTerrainType() == TERRAIN_LARGE_RIVERS)
 			{
 				bLandUnitMayPassLargeRiverDueToImprovement = (kPlot.getImprovementType() != NO_IMPROVEMENT && GC.getImprovementInfo(kPlot.getImprovementType()).getTerrainMakesValid(TERRAIN_LARGE_RIVERS));
-				bLandUnitMayPassLargeRiverDueToTerrainFeature = (kPlot.getFeatureType() != NO_FEATURE && GC.getFeatureInfo(kPlot.getFeatureType()).isTerrain(TERRAIN_LARGE_RIVERS));
+				bLandUnitMayPassLargeRiverDueToTerrainFeature = (eFeature != NO_FEATURE && GC.getFeatureInfo(eFeature).isTerrain(TERRAIN_LARGE_RIVERS));
 				bLandUnitMayPassLargeRiverDueToProfession = (getProfession() != NO_PROFESSION && GC.getProfessionInfo(getProfession()).isCanCrossLargeRivers());
 				bLandUnitMayBeLoaded = canLoad(&kPlot, false);
 			}
@@ -2922,7 +2937,7 @@ bool CvUnit::canMoveInto(CvPlot const& kPlot, bool bAttack, bool bDeclareWar, bo
 
 			// stop large ships from entering Large Rivers in own Terrain
 			// if (DOMAIN_SEA != getDomainType() || ePlotTeam != getTeam()) // sea units can enter impassable in own cultural borders
-			if (DOMAIN_SEA != getDomainType() || ePlotTeam != getTeam() || kPlot.getTerrainType() == TERRAIN_LARGE_RIVERS)
+			if (DOMAIN_SEA != eDomainType || ePlotTeam != getTeam() || kPlot.getTerrainType() == TERRAIN_LARGE_RIVERS)
 			{
 				// if (bIgnoreLoad || !canLoad(pPlot, true))
 				if (bIgnoreLoad || !canLoad(&kPlot, true))
@@ -2942,7 +2957,7 @@ bool CvUnit::canMoveInto(CvPlot const& kPlot, bool bAttack, bool bDeclareWar, bo
 		return false;
 	}
 
-	switch (getDomainType())
+	switch (eDomainType)
 	{
 	case DOMAIN_SEA:
 		if (!kPlot.isWater() && !m_pUnitInfo->isCanMoveAllTerrain())
