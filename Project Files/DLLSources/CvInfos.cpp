@@ -10890,7 +10890,6 @@ CvTraitInfo::CvTraitInfo() :
 	m_iCultureLevelModifier(0),
 	m_iPioneerSpeedModifier(0),
 	m_iImprovementPriceModifier(0),
-	m_iLearningByDoingModifier(0),
 	m_iSpecialistPriceModifier(0),
 	m_iStorageCapacityModifier(0),		// Schmiddie, 7 new variables for traits for Europeans, END
 	m_aiYieldModifier(NULL),
@@ -11059,11 +11058,6 @@ int CvTraitInfo::getImprovementPriceModifier() const
 	return m_iImprovementPriceModifier;
 }
 
-int CvTraitInfo::getLearningByDoingModifier() const
-{
-	return m_iLearningByDoingModifier;
-}
-
 int CvTraitInfo::getSpecialistPriceModifier() const
 {
 	return m_iSpecialistPriceModifier;
@@ -11209,7 +11203,6 @@ void CvTraitInfo::read(FDataStreamBase* stream)
 	stream->Read(&m_iCultureLevelModifier);
 	stream->Read(&m_iPioneerSpeedModifier);
 	stream->Read(&m_iImprovementPriceModifier);
-	stream->Read(&m_iLearningByDoingModifier);
 	stream->Read(&m_iSpecialistPriceModifier);
 	stream->Read(&m_iStorageCapacityModifier);		// Schmiddie, 7 new variables for traits for Europeans, END
 	stream->ReadString(m_szShortDescription);
@@ -11317,7 +11310,6 @@ void CvTraitInfo::write(FDataStreamBase* stream)
 	stream->Write(m_iCultureLevelModifier);
 	stream->Write(m_iPioneerSpeedModifier);
 	stream->Write(m_iImprovementPriceModifier);
-	stream->Write(m_iLearningByDoingModifier);
 	stream->Write(m_iSpecialistPriceModifier);
 	stream->Write(m_iStorageCapacityModifier);		// Schmiddie, 7 new variables for traits for Europeans, END
 	stream->WriteString(m_szShortDescription);
@@ -11381,7 +11373,6 @@ bool CvTraitInfo::read(CvXMLLoadUtility* pXML)
 	pXML->GetChildXmlValByName(&m_iCultureLevelModifier, "iCultureLevelModifier");
 	pXML->GetChildXmlValByName(&m_iPioneerSpeedModifier, "iPioneerSpeedModifier");
 	pXML->GetChildXmlValByName(&m_iImprovementPriceModifier, "iImprovementPriceModifier");
-	pXML->GetChildXmlValByName(&m_iLearningByDoingModifier, "iLearningByDoingModifier");
 	pXML->GetChildXmlValByName(&m_iSpecialistPriceModifier, "iSpecialistPriceModifier");
 	pXML->GetChildXmlValByName(&m_iStorageCapacityModifier, "iStorageCapacityModifier");		// Schmiddie, 7 new variables for traits for Europeans, END
 
@@ -16393,6 +16384,10 @@ bool CvTradeScreenInfo::read(CvXMLLoadUtility* pXML)
 ///
 /// CivEffect
 ///
+int CivEffectInfo::getLearningByDoingModifier() const
+{
+	return m_iLearningByDoingModifier;
+}
 
 CivEffectInfo::CivEffectInfo(bool bAutogenerateAllow)
 	// allow
@@ -16402,6 +16397,9 @@ CivEffectInfo::CivEffectInfo(bool bAutogenerateAllow)
 
 	// growth
 	, m_iNumUnitsOnDockChange(0)
+
+	// unit
+	, m_iLearningByDoingModifier(0)
 {
 	if (bAutogenerateAllow)
 	{
@@ -16497,7 +16495,8 @@ bool CivEffectInfo::read(CvXMLLoadUtility* pXML)
 
 	if (gDLL->getXMLIFace()->SetToChildByTagName(pXML->GetXML(), "TagGroupGrowth"))
 	{
-		pXML->GetChildXmlValByName(&m_iNumUnitsOnDockChange, "iNumUnitsOnDockChange");
+		pXML->GetChildXmlValByName(&m_iLearningByDoingModifier , "iLearningByDoingModifier"     );
+		pXML->GetChildXmlValByName(&m_iNumUnitsOnDockChange    , "iNumUnitsOnDockChange"        );
 
 		gDLL->getXMLIFace()->SetToParent(pXML->GetXML());
 	}
