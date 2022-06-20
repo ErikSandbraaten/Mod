@@ -775,7 +775,7 @@ set TARGET=Debug
 nmake clean /NOLOGO</NMakeCleanCommandLine>
     <AdditionalOptions>/DWIN32 /D_WINDOWS /D_USRDLL /DCVGAMECOREDLL_EXPORTS /D_DEBUG /DUSE_DATA_DIR /DHARDCODE_XML_VALUES</AdditionalOptions>
     <NMakeIncludeSearchPath />
-    <IncludePath>$(ProjectDir)\..\..\Compiler\Microsoft Visual C++ Toolkit 2003\include;$(ProjectDir)\..\..\Compiler\Microsoft SDKs\Windows\v6.0\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\..\..\..\CvGameCoreDLL\Boost-1.32.0\include;$(ProjectDir)\..\..\Compiler\Microsoft Visual C++ Toolkit 2003\include;$(ProjectDir)\..\..\Compiler\Microsoft SDKs\Windows\v6.0\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Multi core-Profile|Win32'">
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
