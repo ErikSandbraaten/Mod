@@ -2638,6 +2638,20 @@ bool CvUnit::canDoCommand(CommandTypes eCommand, int iData1, int iData2, bool bT
 		break;
 	// WTP, ray, Construction Supplies - END
 
+	case COMMAND_ALLOW_DANGEROUS_PATH:
+		if (!isAllowDangerousPath())
+		{
+			return true;
+		}
+		break;
+
+	case COMMAND_DISALLOW_DANGEROUS_PATH:
+		if (isAllowDangerousPath())
+		{
+			return true;
+		}
+		break;
+
 	default:
 		FAssert(false);
 		break;
@@ -2947,6 +2961,14 @@ void CvUnit::doCommand(CommandTypes eCommand, int iData1, int iData2)
 			}
 			break;
 		// WTP, ray, Construction Supplies - END
+
+		case COMMAND_ALLOW_DANGEROUS_PATH:
+			setAllowDangerousPath(true);
+			break;
+
+		case COMMAND_DISALLOW_DANGEROUS_PATH:
+			setAllowDangerousPath(false);
+			break;
 
 		default:
 			FAssert(false);
@@ -16734,4 +16756,20 @@ int CvUnit::getDiscriminationFactor() const
 		}
 	}
 	return 0;
+}
+
+bool CvUnit::isAllowDangerousPath() const
+{
+	return m_bAllowDangerousPath;
+}
+
+void CvUnit::setAllowDangerousPath(bool bNewValue)
+{
+	if (m_bAllowDangerousPath != bNewValue)
+	{
+		// UI path finder needs a reset since it may be caching a path that 
+		// we may invalidate with this setting 
+		gDLL->getFAStarIFace()->ForceReset(&GC.getInterfacePathFinder());
+		m_bAllowDangerousPath = bNewValue;
+	}
 }
